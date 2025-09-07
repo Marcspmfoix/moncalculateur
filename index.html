@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Calculateur Hauteurs de Coupe - Test Planche 1 et 4</title>
+<title>Calculateur Hauteurs de Coupe - Affichage ajusté</title>
 <style>
   body {
     font-size: 1.3em;
@@ -82,13 +82,13 @@ function calculer() {
   let resultats = '';
   errDiv.innerText = '';
 
-  if(nbrPlanches > 0 && hauteurTronc === 0) {
+  if (nbrPlanches > 0 && hauteurTronc === 0) {
     // Cas 1 : nombre de planches demandé
     let position = 0;
-    for(let i=1; i<=nbrPlanches; i++) {
-      if(i === 1) {
+    for (let i = 1; i <= nbrPlanches; i++) {
+      if (i === 1) {
         position += ep;
-      } else if(i < nbrPlanches) {
+      } else if (i < nbrPlanches) {
         position += ep + ts;
       } else {
         position += ep;
@@ -99,42 +99,28 @@ function calculer() {
     return;
   }
 
-  if(hauteurTronc > 0 && nbrPlanches === 0) {
+  if (hauteurTronc > 0 && nbrPlanches === 0) {
     // Cas 2 : hauteur du tronc donnée
-
-    // Calcul hauteur des traits du haut vers le bas
     let traits = [hauteurTronc];
     let pos = hauteurTronc;
-
-    while(true) {
+    while (true) {
       pos -= (ep + ts);
       if (pos <= 0) break;
       traits.push(pos);
     }
     traits.push(0);
-
-    // Trier traits du bas (0) vers haut (hauteurTronc)
-    traits.sort((a,b) => a - b);
-
-    // Nombre de planches = nb traits - 1
+    traits.sort((a, b) => a - b);
     let n = traits.length - 1;
-
-    // Calcul épaisseur planche 1 (différence planche 2 - planche 1)
     let ep1 = traits[1] - traits[0];
-    if(ep1 !== ep) {
-      resultats += `<li><strong>Épaisseur planche 1 (bas) ajustée : ${ep1.toFixed(2)} mm</strong></li>`;
+    if (ep1 !== ep) {
+      resultats += `<li>Épaisseur planche 1 (bas) ajustée : ${ep1.toFixed(2)} mm</li>`;
     }
-
-    // Test affichage spécifiquement planches 1 et 4 pour l'exemple
     if (n >= 4) {
-      resultats += `<li><strong>Exemple: hauteur planche 1 : ${traits[1].toFixed(2)} mm</strong></li>`;
-      resultats += `<li><strong>Exemple: hauteur planche 4 : ${traits[4].toFixed(2)} mm</strong></li>`;
+      resultats += `<li>Exemple: hauteur planche 1 : ${traits[1].toFixed(2)} mm</li>`;
+      resultats += `<li>Exemple: hauteur planche 4 : ${traits[4].toFixed(2)} mm</li>`;
     }
-
     resultats += `<li><strong>Nombre de planches obtenues : ${n}</strong></li>`;
-
-    // Afficher toutes les hauteurs sauf planche 0 (base)
-    for(let i=1; i < traits.length; i++) {
+    for (let i = 1; i < traits.length; i++) {
       resultats += `<li>Hauteur planche ${i} : <strong>${traits[i].toFixed(2)} mm</strong></li>`;
     }
     document.getElementById('resultats').innerHTML = resultats;
@@ -148,6 +134,8 @@ function calculer() {
 
 </body>
 </html>
+
+
 
 
 
