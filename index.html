@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Calculateur Hauteurs de Coupe</title>
   <style>
     body {
@@ -47,16 +47,16 @@
 
 <form id="formPlanches" autocomplete="off" onsubmit="event.preventDefault(); calculer();">
   <label for="epaisseur">Épaisseur désirée d'une planche (mm) :</label>
-  <input type="number" id="epaisseur" min="1" value="25" required step="any">
+  <input type="number" id="epaisseur" min="1" value="25" required step="any" />
 
   <div class="champ-group">
     <div style="width:50%">
       <label for="nbrPlanches">Nombre de planches souhaité :</label>
-      <input type="number" id="nbrPlanches" min="0" value="0" oninput="vider('tronc')">
+      <input type="number" id="nbrPlanches" min="0" value="0" oninput="vider('tronc')" />
     </div>
     <div style="width:50%">
       <label for="tronc">Hauteur du tronc à débiter (mm) :</label>
-      <input type="number" id="tronc" min="0" value="0" oninput="vider('nbrPlanches')">
+      <input type="number" id="tronc" min="0" value="0" oninput="vider('nbrPlanches')" />
     </div>
   </div>
 
@@ -68,9 +68,8 @@
 <ul id="resultats"></ul>
 
 <script>
-const ts = 2; // Épaisseur fixe du trait de scie (mm)
+const ts = 2; // Trait de scie fixe 2 mm
 
-// Si on saisit l'un des champs, l'autre devient 0
 function vider(champ) {
   document.getElementById(champ).value = 0;
   document.getElementById('erreur').innerText = '';
@@ -85,8 +84,8 @@ function calculer() {
   let resultats = '';
   errDiv.innerText = '';
 
-  // Cas 1 : Nombre de planches renseigné
   if(nPl > 0 && tronc === 0) {
+    // Cas 1 : Nombre de planches donné
     let cumule = 0;
     for(let i=1; i<=nPl; i++) {
       if(i === 1) {
@@ -94,39 +93,49 @@ function calculer() {
       } else if(i < nPl) {
         cumule += ep + ts;
       } else {
-        cumule += ep; // dernier, pas de trait de scie
-      }
-      resultats += `<li>Hauteur planche ${i} : <strong>${cumule.toFixed(2)} mm</strong></li>`;
-    }
-    document.getElementById('resultats').innerHTML = resultats;
-    return;
-  }
-
- // Cas 2 : Hauteur du tronc renseignée
-  if(tronc > 0 && nPl === 0) {
-    // Calcul du nombre de planches possible (on ignore le dernier trait de scie)
-    // total = n*ep + (n-1)*ts <= tronc
-    let n = Math.floor((tronc + ts) / (ep + ts));
-    if (n < 1) n = 1;
-    // Vérifier que ça rentre vraiment (sinon recule)
-    while (n > 1 && ((n * ep) + ((n-1) * ts)) > tronc) n--;
-    let cumule = 0;
-    for(let i=1; i<=n; i++) {
-      if(i === 1) {
         cumule += ep;
-      } else if(i < n) {
-        cumule += ep + ts;
-      } else {
-        cumule += ep; // dernier, pas de trait de scie
       }
       resultats += `<li>Hauteur planche ${i} : <strong>${cumule.toFixed(2)} mm</strong></li>`;
     }
-    resultats = `<li><strong>Nombre de planches réalisables : ${n}</strong></li>` + resultats;
     document.getElementById('resultats').innerHTML = resultats;
     return;
   }
 
-  // Aucun ou double champ rempli
+  if(tronc > 0 && nPl === 0) {
+    // Cas 2 : Hauteur du tronc donnée, 1er trait au sommet (hauteur = 0)
+    let hauteurs = [];
+    let hauteurActuelle = 0;
+    let i = 0;
+
+    // On coupe dès le haut du tronc, donc 1ère hauteur = 0
+    hauteurs.push(0);
+
+    while(true) {
+      if(i === 0) {
+        // 1ère coupe verticale au sommet, on descend épaisseur planche
+        hauteurActuelle += ep;
+      } else {
+        // Coupes suivantes, on descend planche + trait de scie
+        hauteurActuelle += ep + ts;
+      }
+      if(hauteurActuelle >= tronc) break;
+      hauteurs.push(hauteurActuelle);
+      i++;
+    }
+
+    // Afficher le nombre total de planches (= nb traits -1)
+    let nbPlanches = hauteurs.length;
+    resultats += `<li><strong>Nombre de planches obtenues : ${nbPlanches}</strong></li>`;
+
+    // Afficher toutes les hauteurs sauf le premier trait à 0 (donc début true)
+    for(let j=1; j < hauteurs.length; j++) {
+      resultats += `<li>Hauteur planche ${j} : <strong>${hauteurs[j].toFixed(2)} mm</strong></li>`;
+    }
+
+    document.getElementById('resultats').innerHTML = resultats;
+    return;
+  }
+
   errDiv.innerText = "Veuillez renseigner soit le nombre de planches, soit la hauteur du tronc, mais pas les deux.";
   document.getElementById('resultats').innerHTML = '';
 }
@@ -134,3 +143,4 @@ function calculer() {
 
 </body>
 </html>
+
