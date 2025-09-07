@@ -1,44 +1,44 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Calculateur Hauteurs de Coupe</title>
-  <style>
-    body {
-      font-size: 1.3em;
-      font-family: Arial, sans-serif;
-      padding: 12px;
-      max-width: 650px;
-      margin: auto;
-      background-color: #fffff8;
-      color: #000;
-    }
-    input, button {
-      font-size: 1.2em;
-      padding: 8px 12px;
-      margin: 8px 0;
-      width: 100%;
-      box-sizing: border-box;
-      border-radius: 6px;
-    }
-    input[type=number]::-webkit-inner-spin-button, 
-    input[type=number]::-webkit-outer-spin-button { 
-      -webkit-appearance: none; margin: 0; 
-    }
-    label { display:block; margin-top:14px; font-weight: bold; }
-    h3, h4 { font-size:1.3em; margin-top:15px; }
-    ul { padding-left: 20px; }
-    button {
-      background-color:#28a745; color:white; border:none;
-      cursor:pointer;font-weight:bold; box-shadow:2px 2px 6px rgba(0,0,0,0.25);
-    }
-    button:hover { background-color:#218838;}
-    .champ-group { display: flex; gap:12px; }
-    .champ-group input { width:calc(50% - 8px); }
-    .info { font-size:0.95em; color:#555; margin:9px 0 12px 0;}
-    .err { color: #a00; font-size:0.96em;}
-  </style>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Calculateur Hauteurs de Coupe - Planche 1 Variation</title>
+<style>
+  body {
+    font-size: 1.3em;
+    font-family: Arial, sans-serif;
+    padding: 12px;
+    max-width: 650px;
+    margin: auto;
+    background-color: #fffff8;
+    color: #000;
+  }
+  input, button {
+    font-size: 1.2em;
+    padding: 8px 12px;
+    margin: 8px 0;
+    width: 100%;
+    box-sizing: border-box;
+    border-radius: 6px;
+  }
+  input[type=number]::-webkit-inner-spin-button, 
+  input[type=number]::-webkit-outer-spin-button { 
+    -webkit-appearance: none; margin: 0; 
+  }
+  label { display:block; margin-top:14px; font-weight: bold; }
+  h3, h4 { font-size:1.3em; margin-top:15px; }
+  ul { padding-left: 20px; }
+  button {
+    background-color:#28a745; color:white; border:none;
+    cursor:pointer;font-weight:bold; box-shadow:2px 2px 6px rgba(0,0,0,0.25);
+  }
+  button:hover { background-color:#218838;}
+  .champ-group { display: flex; gap:12px; }
+  .champ-group input { width:calc(50% - 8px); }
+  .info { font-size:0.95em; color:#555; margin:9px 0 12px 0;}
+  .err { color: #a00; font-size:0.96em;}
+</style>
 </head>
 <body>
 
@@ -47,19 +47,17 @@
 
 <form id="formPlanches" autocomplete="off" onsubmit="event.preventDefault(); calculer();">
   <label for="epaisseur">Épaisseur désirée d'une planche (mm) :</label>
-  <input type="number" id="epaisseur" min="1" value="25" required step="any" />
-
+  <input type="number" id="epaisseur" min="1" value="25" required step="any"/>
   <div class="champ-group">
     <div style="width:50%">
       <label for="nbrPlanches">Nombre de planches souhaité :</label>
-      <input type="number" id="nbrPlanches" min="0" value="0" oninput="vider('tronc')" />
+      <input type="number" id="nbrPlanches" min="0" value="0" oninput="vider('tronc')"/>
     </div>
     <div style="width:50%">
       <label for="tronc">Hauteur du tronc à débiter (mm) :</label>
-      <input type="number" id="tronc" min="0" value="0" oninput="vider('nbrPlanches')" />
+      <input type="number" id="tronc" min="0" value="0" oninput="vider('nbrPlanches')"/>
     </div>
   </div>
-
   <button type="submit">🔢 Calculer</button>
 </form>
 
@@ -68,7 +66,7 @@
 <ul id="resultats"></ul>
 
 <script>
-const ts = 2; // Trait de scie fixe 2 mm
+const ts = 2; // Épaisseur trait de scie fixe 2 mm
 
 function vider(champ) {
   document.getElementById(champ).value = 0;
@@ -85,7 +83,7 @@ function calculer() {
   errDiv.innerText = '';
 
   if(nPl > 0 && tronc === 0) {
-    // Cas 1 : Nombre de planches donné
+    // Cas 1 : Nombre planches donné
     let cumule = 0;
     for(let i=1; i<=nPl; i++) {
       if(i === 1) {
@@ -102,38 +100,43 @@ function calculer() {
   }
 
   if(tronc > 0 && nPl === 0) {
-    // Cas 2 : Hauteur du tronc donnée, dernier trait = hauteur du tronc
-    let hauteurs = [];
-    let i = 0;
-    // Le dernier trait correspond exactement à la hauteur du tronc (bas)
-    let hauteurActuelle = tronc;
-    hauteurs.push(hauteurActuelle);  // dernier trait = base
+    // Cas 2 : Hauteur du tronc donnée, planche 1 en bas (hauteur 0), planche n en haut (hauteur tronc)
+    // La planche 1 peut avoir épaisseur différente (reste)
+    let hauteurs = [0]; // début à 0 mm, planche 1 en bas
+    let current = 0;
+    let n = 0;
 
-    // Remonter en calculant positions traits successifs (-épaisseur -trait)
+    // On part de bas et on monte tant que possible planches + traits
     while(true) {
-      i++;
-      if(i === 1) {
-        hauteurActuelle -= ep; // planche du bas sans trait dessous
+      if(n === 0) {
+        current += ep; // planche 1
       } else {
-        hauteurActuelle -= (ep + ts);
+        current += ts + ep;
       }
-      if(hauteurActuelle <= 0) break;
-      hauteurs.push(hauteurActuelle);
+      if(current > tronc) break;
+      hauteurs.push(current);
+      n++;
     }
 
-    // Ajouter la coupe la plus haute en 0 mm
-    hauteurs.push(0);
+    // On a soit atteint ou dépassé, on ajuste le dernier trait à la hauteur du tronc
+    // Le reste (épaisseur planche 1) est alors tronc - hauteur du 2ème trait (si présent)
+    if(hauteurs.length > 1) {
+      hauteurs[hauteurs.length - 1] = tronc; // dernier trait = hauteur tronc
+      // Calculer l'épaisseur de la planche 1 = différence entre premier et deuxième trait (ou tronc)
+      const ep1 = hauteurs[1] - hauteurs[0];
+      if(ep1 !== ep) {
+        resultats += `<li><strong>Épaisseur planche 1 (bas) ajustée : ${ep1.toFixed(2)} mm</strong></li>`;
+      }
+    } else {
+      // Si une seule planche seule, équivaut à hauteur tronc
+      resultats += `<li><strong>Une planche : épaisseur ${tronc.toFixed(2)} mm</strong></li>`;
+    }
 
-    // Trier en ordre croissant (du haut vers le bas)
-    hauteurs.sort((a,b) => a - b);
-
-    // Nombre total de planches = nb traits - 1
-    let nbPlanches = hauteurs.length - 1;
+    const nbPlanches = hauteurs.length - 1;
     resultats += `<li><strong>Nombre de planches obtenues : ${nbPlanches}</strong></li>`;
 
-    // Afficher toutes les hauteurs sauf la base (dernier trait)
-    for(let j=0; j < hauteurs.length - 1; j++) {
-      resultats += `<li>Hauteur planche ${j + 1} : <strong>${hauteurs[j].toFixed(2)} mm</strong></li>`;
+    for(let i=1; i < hauteurs.length; i++) {
+      resultats += `<li>Hauteur planche ${i} : <strong>${hauteurs[i].toFixed(2)} mm</strong></li>`;
     }
 
     document.getElementById('resultats').innerHTML = resultats;
@@ -147,5 +150,6 @@ function calculer() {
 
 </body>
 </html>
+
 
 
