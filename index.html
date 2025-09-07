@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Calculateur Hauteurs de Coupe - Affichage ajusté</title>
+<title>Calculateur Hauteurs de Coupe - Affichage épuré</title>
 <style>
   body {
     font-size: 1.3em;
@@ -111,14 +111,7 @@ function calculer() {
     traits.push(0);
     traits.sort((a, b) => a - b);
     let n = traits.length - 1;
-    let ep1 = traits[1] - traits[0];
-    if (ep1 !== ep) {
-      resultats += `<li>Épaisseur planche 1 (bas) ajustée : ${ep1.toFixed(2)} mm</li>`;
-    }
-    if (n >= 4) {
-      resultats += `<li>Exemple: hauteur planche 1 : ${traits[1].toFixed(2)} mm</li>`;
-      resultats += `<li>Exemple: hauteur planche 4 : ${traits[4].toFixed(2)} mm</li>`;
-    }
+
     resultats += `<li><strong>Nombre de planches obtenues : ${n}</strong></li>`;
     for (let i = 1; i < traits.length; i++) {
       resultats += `<li>Hauteur planche ${i} : <strong>${traits[i].toFixed(2)} mm</strong></li>`;
@@ -134,6 +127,7 @@ function calculer() {
 
 </body>
 </html>
+
 
 
 
