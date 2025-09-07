@@ -1,110 +1,134 @@
 <!DOCTYPE html>
 <html lang="fr">
-<he<!DOCTYPE html>
-<html lang="fr">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Calculateur Hauteurs de Coupe - Trait de Scie 2mm</title>
+  <title>Calculateur Hauteurs de Coupe</title>
   <style>
     body {
-      font-size: 1.4em;
+      font-size: 1.3em;
       font-family: Arial, sans-serif;
-      padding: 10px;
+      padding: 12px;
       max-width: 650px;
       margin: auto;
       background-color: #fffff8;
       color: #000;
     }
     input, button {
-      font-size: 1.4em;
-      padding: 10px 12px;
+      font-size: 1.2em;
+      padding: 8px 12px;
       margin: 8px 0;
       width: 100%;
       box-sizing: border-box;
       border-radius: 6px;
     }
-    input {
-      border: 2px solid #333;
-      background-color: #fff;
+    input[type=number]::-webkit-inner-spin-button, 
+    input[type=number]::-webkit-outer-spin-button { 
+      -webkit-appearance: none; margin: 0; 
     }
-    label {
-      display: block;
-      margin-top: 14px;
-      font-weight: bold;
-    }
-    h3, h4 {
-      font-size: 1.5em;
-      margin-top: 15px;
-    }
-    ul {
-      padding-left: 20px;
-    }
+    label { display:block; margin-top:14px; font-weight: bold; }
+    h3, h4 { font-size:1.3em; margin-top:15px; }
+    ul { padding-left: 20px; }
     button {
-      background-color: #28a745;
-      color: white;
-      border: none;
-      cursor: pointer;
-      font-weight: bold;
-      box-shadow: 2px 2px 6px rgba(0,0,0,0.4);
+      background-color:#28a745; color:white; border:none;
+      cursor:pointer;font-weight:bold; box-shadow:2px 2px 6px rgba(0,0,0,0.25);
     }
-    button:hover {
-      background-color: #218838;
-    }
-    li {
-      padding: 4px 0;
-    }
-    .info {
-      font-size: 0.9em;
-      color: #555;
-      margin-top: 0.3em;
-      margin-bottom: 1.2em;
-    }
+    button:hover { background-color:#218838;}
+    .champ-group { display: flex; gap:12px; }
+    .champ-group input { width:calc(50% - 8px); }
+    .info { font-size:0.95em; color:#555; margin:9px 0 12px 0;}
+    .err { color: #a00; font-size:0.96em;}
   </style>
 </head>
 <body>
 
 <h3>Calcul des hauteurs de coupe</h3>
-
 <div class="info">Épaisseur du trait de scie : <strong>2 mm (fixe)</strong></div>
 
-<label>Nombre de planches :
-  <input type="number" id="nbrPlanches" value="3" min="1">
-</label>
+<form id="formPlanches" autocomplete="off" onsubmit="event.preventDefault(); calculer();">
+  <label for="epaisseur">Épaisseur désirée d'une planche (mm) :</label>
+  <input type="number" id="epaisseur" min="1" value="25" required step="any">
 
-<label>Épaisseur d'une planche (mm) :
-  <input type="number" id="epaisseur" value="25" min="1">
-</label>
+  <div class="champ-group">
+    <div style="width:50%">
+      <label for="nbrPlanches">Nombre de planches souhaité :</label>
+      <input type="number" id="nbrPlanches" min="0" value="0" oninput="vider('tronc')">
+    </div>
+    <div style="width:50%">
+      <label for="tronc">Hauteur du tronc à débiter (mm) :</label>
+      <input type="number" id="tronc" min="0" value="0" oninput="vider('nbrPlanches')">
+    </div>
+  </div>
 
-<button onclick="calculerHauteurs()">🔢 Calculer</button>
+  <button type="submit">🔢 Calculer</button>
+</form>
 
-<h4>Hauteurs de coupe :</h4>
+<div id="erreur" class="err"></div>
+<h4>Hauteurs de coupe :</h4>
 <ul id="resultats"></ul>
 
 <script>
-function calculerHauteurs() {
-  const n = parseInt(document.getElementById('nbrPlanches').value);
+const ts = 2; // Épaisseur fixe du trait de scie (mm)
+
+// Si on saisit l'un des champs, l'autre devient 0
+function vider(champ) {
+  document.getElementById(champ).value = 0;
+  document.getElementById('erreur').innerText = '';
+  document.getElementById('resultats').innerHTML = '';
+}
+
+function calculer() {
   const ep = parseFloat(document.getElementById('epaisseur').value);
-  const ts = 2; // Trait de scie constant de 2 mm
-
-  let cumule = 0;
+  const nPl = parseInt(document.getElementById('nbrPlanches').value, 10) || 0;
+  const tronc = parseFloat(document.getElementById('tronc').value) || 0;
+  const errDiv = document.getElementById('erreur');
   let resultats = '';
+  errDiv.innerText = '';
 
-  for (let i = 1; i <= n; i++) {
-    if (i === 1) {
-      // Première coupe : pas de trait de scie
-      cumule += ep;
-    } else if (i < n) {
-      // Coupes intermédiaires : planche + trait de scie
-      cumule += ep + ts;
-    } else {
-      // Dernière planche : on ignore le trait de scie
-      cumule += ep;
+  // Cas 1 : Nombre de planches renseigné
+  if(nPl > 0 && tronc === 0) {
+    let cumule = 0;
+    for(let i=1; i<=nPl; i++) {
+      if(i === 1) {
+        cumule += ep;
+      } else if(i < nPl) {
+        cumule += ep + ts;
+      } else {
+        cumule += ep; // dernier, pas de trait de scie
+      }
+      resultats += `<li>Hauteur planche ${i} : <strong>${cumule.toFixed(2)} mm</strong></li>`;
     }
-    resultats += `<li>Hauteur planche ${i} : <strong>${cumule.toFixed(2)} mm</strong></li>`;
+    document.getElementById('resultats').innerHTML = resultats;
+    return;
   }
 
-  document.getElementById('resultats').innerHTML = resultats;
+ // Cas 2 : Hauteur du tronc renseignée
+  if(tronc > 0 && nPl === 0) {
+    // Calcul du nombre de planches possible (on ignore le dernier trait de scie)
+    // total = n*ep + (n-1)*ts <= tronc
+    let n = Math.floor((tronc + ts) / (ep + ts));
+    if (n < 1) n = 1;
+    // Vérifier que ça rentre vraiment (sinon recule)
+    while (n > 1 && ((n * ep) + ((n-1) * ts)) > tronc) n--;
+    let cumule = 0;
+    for(let i=1; i<=n; i++) {
+      if(i === 1) {
+        cumule += ep;
+      } else if(i < n) {
+        cumule += ep + ts;
+      } else {
+        cumule += ep; // dernier, pas de trait de scie
+      }
+      resultats += `<li>Hauteur planche ${i} : <strong>${cumule.toFixed(2)} mm</strong></li>`;
+    }
+    resultats = `<li><strong>Nombre de planches réalisables : ${n}</strong></li>` + resultats;
+    document.getElementById('resultats').innerHTML = resultats;
+    return;
+  }
+
+  // Aucun ou double champ rempli
+  errDiv.innerText = "Veuillez renseigner soit le nombre de planches, soit la hauteur du tronc, mais pas les deux.";
+  document.getElementById('resultats').innerHTML = '';
 }
 </script>
 
