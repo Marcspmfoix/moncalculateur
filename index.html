@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Calculateur Hauteurs de Coupe - Exact Trait Haut</title>
+<title>Calculateur Hauteurs de Coupe - Test Planche 1 et 4</title>
 <style>
   body {
     font-size: 1.3em;
@@ -22,18 +22,18 @@
     box-sizing: border-box;
     border-radius: 6px;
   }
-  input[type=number]::-webkit-inner-spin-button, 
-  input[type=number]::-webkit-outer-spin-button { 
-    -webkit-appearance: none; margin: 0; 
+  input[type=number]::-webkit-inner-spin-button,
+  input[type=number]::-webkit-outer-spin-button {
+    -webkit-appearance: none; margin: 0;
   }
-  label { display:block; margin-top:14px; font-weight: bold; }
-  h3, h4 { font-size:1.3em; margin-top:15px; }
+  label { display: block; margin-top:14px; font-weight: bold; }
+  h3, h4 { font-size: 1.3em; margin-top: 15px; }
   ul { padding-left: 20px; }
   button {
-    background-color:#28a745; color:white; border:none;
-    cursor:pointer;font-weight:bold; box-shadow:2px 2px 6px rgba(0,0,0,0.25);
+    background-color: #28a745; color: white; border: none;
+    cursor: pointer; font-weight: bold; box-shadow: 2px 2px 6px rgba(0,0,0,0.25);
   }
-  button:hover { background-color:#218838;}
+  button:hover { background-color:#218838; }
   .champ-group { display: flex; gap: 12px; }
   .champ-group input { width: calc(50% - 8px); }
   .info { font-size: 0.95em; color: #555; margin: 9px 0 12px 0; }
@@ -55,7 +55,7 @@
     </div>
     <div style="width:50%">
       <label for="tronc">Hauteur du tronc à débiter (mm) :</label>
-      <input type="number" id="tronc" min="0" value="0" oninput="vider('nbrPlanches')"/>
+      <input type="number" id="tronc" min="0" value="150" oninput="vider('nbrPlanches')"/>
     </div>
   </div>
   <button type="submit">🔢 Calculer</button>
@@ -66,7 +66,7 @@
 <ul id="resultats"></ul>
 
 <script>
-const ts = 2;  // Épaisseur trait de scie fixe
+const ts = 2; // Épaisseur trait de scie fixe
 
 function vider(champ) {
   document.getElementById(champ).value = 0;
@@ -82,13 +82,13 @@ function calculer() {
   let resultats = '';
   errDiv.innerText = '';
 
-  if (nbrPlanches > 0 && hauteurTronc === 0) {
+  if(nbrPlanches > 0 && hauteurTronc === 0) {
     // Cas 1 : nombre de planches demandé
     let position = 0;
-    for (let i = 1; i <= nbrPlanches; i++) {
-      if (i === 1) {
+    for(let i=1; i<=nbrPlanches; i++) {
+      if(i === 1) {
         position += ep;
-      } else if (i < nbrPlanches) {
+      } else if(i < nbrPlanches) {
         position += ep + ts;
       } else {
         position += ep;
@@ -99,44 +99,43 @@ function calculer() {
     return;
   }
 
-  if (hauteurTronc > 0 && nbrPlanches === 0) {
-    // Cas 2 : hauteur du tronc donnée, planche 1 en bas (0), planche n en haut (hauteur tronc)
-    let hauteurs = [];
-    let hauteurActuelle = hauteurTronc;
-    hauteurs.push(hauteurActuelle); // dernier trait à hauteurTronc
+  if(hauteurTronc > 0 && nbrPlanches === 0) {
+    // Cas 2 : hauteur du tronc donnée
 
-    while (true) {
-      hauteurActuelle -= (ep + ts);
-      if (hauteurActuelle <= 0) break;
-      hauteurs.push(hauteurActuelle);
+    // Calcul hauteur des traits du haut vers le bas
+    let traits = [hauteurTronc];
+    let pos = hauteurTronc;
+
+    while(true) {
+      pos -= (ep + ts);
+      if (pos <= 0) break;
+      traits.push(pos);
     }
-    if (hauteurActuelle < 0) {
-      // ajuster la première planche en bas (hauteur 0)
-      hauteurs.push(0);
-    }
+    traits.push(0);
 
-    // trie croissant (bas en haut)
-    hauteurs.sort((a, b) => a - b);
+    // Trier traits du bas (0) vers haut (hauteurTronc)
+    traits.sort((a,b) => a - b);
 
-    // nombre de planches = nb traits - 1
-    const nbPlanches = hauteurs.length -1;
+    // Nombre de planches = nb traits - 1
+    let n = traits.length - 1;
 
-    // calcul épaisseur planche 1 (différence entre trait 2 et 1)
-    if (nbPlanches > 0) {
-      let ep1 = hauteurs[1] - hauteurs[0];
-      if (ep1 !== ep) {
-        resultats += `<li><strong>Épaisseur planche 1 (bas) ajustée : ${ep1.toFixed(2)} mm</strong></li>`;
-      }
-    } else {
-      resultats += `<li><strong>Une planche : épaisseur ${hauteurTronc.toFixed(2)} mm</strong></li>`;
+    // Calcul épaisseur planche 1 (différence planche 2 - planche 1)
+    let ep1 = traits[1] - traits[0];
+    if(ep1 !== ep) {
+      resultats += `<li><strong>Épaisseur planche 1 (bas) ajustée : ${ep1.toFixed(2)} mm</strong></li>`;
     }
 
-    // afficher nb planches
-    resultats += `<li><strong>Nombre de planches obtenues : ${nbPlanches}</strong></li>`;
+    // Test affichage spécifiquement planches 1 et 4 pour l'exemple
+    if (n >= 4) {
+      resultats += `<li><strong>Exemple: hauteur planche 1 : ${traits[1].toFixed(2)} mm</strong></li>`;
+      resultats += `<li><strong>Exemple: hauteur planche 4 : ${traits[4].toFixed(2)} mm</strong></li>`;
+    }
 
-    // afficher hauteurs de planches (de bas en haut)
-    for (let i = 1; i < hauteurs.length; i++) {
-      resultats += `<li>Hauteur planche ${i} : <strong>${hauteurs[i].toFixed(2)} mm</strong></li>`;
+    resultats += `<li><strong>Nombre de planches obtenues : ${n}</strong></li>`;
+
+    // Afficher toutes les hauteurs sauf planche 0 (base)
+    for(let i=1; i < traits.length; i++) {
+      resultats += `<li>Hauteur planche ${i} : <strong>${traits[i].toFixed(2)} mm</strong></li>`;
     }
     document.getElementById('resultats').innerHTML = resultats;
     return;
@@ -149,6 +148,7 @@ function calculer() {
 
 </body>
 </html>
+
 
 
 
