@@ -102,34 +102,38 @@ function calculer() {
   }
 
   if(tronc > 0 && nPl === 0) {
-    // Cas 2 : Hauteur du tronc donnée, 1er trait au sommet (hauteur = 0)
+    // Cas 2 : Hauteur du tronc donnée, dernier trait = hauteur du tronc
     let hauteurs = [];
-    let hauteurActuelle = 0;
     let i = 0;
+    // Le dernier trait correspond exactement à la hauteur du tronc (bas)
+    let hauteurActuelle = tronc;
+    hauteurs.push(hauteurActuelle);  // dernier trait = base
 
-    // On coupe dès le haut du tronc, donc 1ère hauteur = 0
-    hauteurs.push(0);
-
+    // Remonter en calculant positions traits successifs (-épaisseur -trait)
     while(true) {
-      if(i === 0) {
-        // 1ère coupe verticale au sommet, on descend épaisseur planche
-        hauteurActuelle += ep;
-      } else {
-        // Coupes suivantes, on descend planche + trait de scie
-        hauteurActuelle += ep + ts;
-      }
-      if(hauteurActuelle >= tronc) break;
-      hauteurs.push(hauteurActuelle);
       i++;
+      if(i === 1) {
+        hauteurActuelle -= ep; // planche du bas sans trait dessous
+      } else {
+        hauteurActuelle -= (ep + ts);
+      }
+      if(hauteurActuelle <= 0) break;
+      hauteurs.push(hauteurActuelle);
     }
 
-    // Afficher le nombre total de planches (= nb traits -1)
-    let nbPlanches = hauteurs.length;
+    // Ajouter la coupe la plus haute en 0 mm
+    hauteurs.push(0);
+
+    // Trier en ordre croissant (du haut vers le bas)
+    hauteurs.sort((a,b) => a - b);
+
+    // Nombre total de planches = nb traits - 1
+    let nbPlanches = hauteurs.length - 1;
     resultats += `<li><strong>Nombre de planches obtenues : ${nbPlanches}</strong></li>`;
 
-    // Afficher toutes les hauteurs sauf le premier trait à 0 (donc début true)
-    for(let j=1; j < hauteurs.length; j++) {
-      resultats += `<li>Hauteur planche ${j} : <strong>${hauteurs[j].toFixed(2)} mm</strong></li>`;
+    // Afficher toutes les hauteurs sauf la base (dernier trait)
+    for(let j=0; j < hauteurs.length - 1; j++) {
+      resultats += `<li>Hauteur planche ${j + 1} : <strong>${hauteurs[j].toFixed(2)} mm</strong></li>`;
     }
 
     document.getElementById('resultats').innerHTML = resultats;
@@ -143,4 +147,5 @@ function calculer() {
 
 </body>
 </html>
+
 
