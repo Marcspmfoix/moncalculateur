@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Calculateur Hauteurs de Coupe - Planche 1 Variation</title>
+<title>Calculateur Hauteurs de Coupe - Planche 1 Ajustée et Trait Haut</title>
 <style>
   body {
     font-size: 1.3em;
@@ -106,33 +106,39 @@ function calculer() {
     let current = 0;
     let n = 0;
 
-    // On part de bas et on monte tant que possible planches + traits
     while(true) {
       if(n === 0) {
         current += ep; // planche 1
+      } else if(n < 1){ // pas possible, mais garde pour sécurité
+        current += ep + ts;
+      } else if(n === 1) {
+        current += ep + ts; // ajouter trait scie pour la 2e planche
       } else {
-        current += ts + ep;
+        current += ep + ts;
       }
       if(current > tronc) break;
       hauteurs.push(current);
       n++;
     }
 
-    // On a soit atteint ou dépassé, on ajuste le dernier trait à la hauteur du tronc
-    // Le reste (épaisseur planche 1) est alors tronc - hauteur du 2ème trait (si présent)
+    // Le dernier trait correspond à la hauteur du tronc
     if(hauteurs.length > 1) {
-      hauteurs[hauteurs.length - 1] = tronc; // dernier trait = hauteur tronc
-      // Calculer l'épaisseur de la planche 1 = différence entre premier et deuxième trait (ou tronc)
-      const ep1 = hauteurs[1] - hauteurs[0];
+      hauteurs[hauteurs.length - 1] = tronc;
+    }
+
+    // Nombre total planches = hauts traits - 1
+    const nbPlanches = hauteurs.length - 1;
+
+    // Afficher l'épaisseur réelle planche 1 si différente
+    if(nbPlanches > 0) {
+      let ep1 = hauteurs[1] - hauteurs[0];
       if(ep1 !== ep) {
         resultats += `<li><strong>Épaisseur planche 1 (bas) ajustée : ${ep1.toFixed(2)} mm</strong></li>`;
       }
     } else {
-      // Si une seule planche seule, équivaut à hauteur tronc
       resultats += `<li><strong>Une planche : épaisseur ${tronc.toFixed(2)} mm</strong></li>`;
     }
 
-    const nbPlanches = hauteurs.length - 1;
     resultats += `<li><strong>Nombre de planches obtenues : ${nbPlanches}</strong></li>`;
 
     for(let i=1; i < hauteurs.length; i++) {
@@ -150,6 +156,7 @@ function calculer() {
 
 </body>
 </html>
+
 
 
 
