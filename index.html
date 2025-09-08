@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Calculateur Hauteurs de Coupe - Affichage épuré</title>
+<title>Calculateur Hauteurs de Coupe - Correction dernier trait</title>
 <style>
   body {
     font-size: 1.3em;
@@ -83,15 +83,14 @@ function calculer() {
   errDiv.innerText = '';
 
   if (nbrPlanches > 0 && hauteurTronc === 0) {
-    // Cas 1 : nombre de planches demandé
+    // Cas 1 : nombre de planches demandé (planche du haut : ajout du trait avant)
     let position = 0;
     for (let i = 1; i <= nbrPlanches; i++) {
       if (i === 1) {
         position += ep;
-      } else if (i < nbrPlanches) {
-        position += ep + ts;
       } else {
-        position += ep;
+        // À chaque planche, on ajoute planche + trait, même pour la dernière
+        position += ts + ep;
       }
       resultats += `<li>Hauteur planche ${i} : <strong>${position.toFixed(2)} mm</strong></li>`;
     }
@@ -127,6 +126,7 @@ function calculer() {
 
 </body>
 </html>
+
 
 
 
